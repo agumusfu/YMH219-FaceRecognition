@@ -3,12 +3,13 @@ using OpenCvSharp;
 namespace FaceRecognition.Services;
 
 /// <summary>
-/// Yerel gönüllü örnek kümeleri üzerinden yüz tanıma/etiketleme ve güven skoru hesaplayan servis.
+/// Yerel gönüllü örnek kümeleri üzerinden sıfır-ortalamalı (Zero-Mean) Pearson korelasyonu ile
+/// yüz tanıma/etiketleme, güven skoru hesaplama ve örnek silme/yönetim servisi.
 /// </summary>
 public class FaceRecognizerService
 {
     private const int FeatureSize = 64;
-    private const double RecognitionThreshold = 0.78;
+    private const double RecognitionThreshold = 0.56;
 
     private readonly string _trainingDir;
     private readonly string _savedFacesDir;
@@ -69,14 +70,14 @@ public class FaceRecognizerService
 
         float[] probe = ExtractFeatureVector(faceCrop);
         string bestLabel = "Bilinmeyen";
-        double bestScore = 0.0;
+        double bestScore = -1.0;
 
         foreach (var kvp in _classVectors)
         {
-            double maxClassScore = 0.0;
+            double maxClassScore = -1.0;
             foreach (var sample in kvp.Value)
             {
-                double sim = CosineSimilarity(probe, sample);
+                double sim = PearsonSimilarity(probe, sample);
                 if (sim > maxClassScore) maxClassScore = sim;
             }
 
@@ -87,12 +88,13 @@ public class FaceRecognizerService
             }
         }
 
+        double displayScore = Math.Clamp(bestScore, 0.0, 1.0);
         if (bestScore < RecognitionThreshold)
         {
-            return ("Bilinmeyen", bestScore);
+            return ("Bilinmeyen", displayScore);
         }
 
-        return (bestLabel, bestScore);
+        return (bestLabel, displayScore);
     }
 
     public string AddTrainingSample(string label, Mat faceCrop)
@@ -117,6 +119,34 @@ public class FaceRecognizerService
         return filePath;
     }
 
+    public bool DeleteClass(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label)) return false;
+        bool removed = _classVectors.Remove(label);
+        string dir = Path.Combine(_trainingDir, label);
+        if (Directory.Exists(dir))
+        {
+            Directory.Delete(dir, recursive: true);
+            removed = true;
+        }
+        return removed;
+    }
+
+    public void DeleteAllTrainingData()
+    {
+        _classVectors.Clear();
+        if (Directory.Exists(_trainingDir))
+        {
+            foreach (string dir in Directory.GetDirectories(_trainingDir))
+                Directory.Delete(dir, recursive: true);
+        }
+        if (Directory.Exists(_savedFacesDir))
+        {
+            foreach (string file in Directory.GetFiles(_savedFacesDir))
+                File.Delete(file);
+        }
+    }
+
     public string SaveDetectedFace(Mat faceCrop, string label)
     {
         string safeLabel = string.Concat(label.Trim().Split(Path.GetInvalidFileNameChars()));
@@ -130,16 +160,22 @@ public class FaceRecognizerService
 
     private static Mat PrepareGrayFace(Mat input)
     {
-        var gray = new Mat();
+        using var gray = new Mat();
         if (input.Channels() > 1)
             Cv2.CvtColor(input, gray, ColorConversionCodes.BGR2GRAY);
         else
             input.CopyTo(gray);
 
+        // Arka plan gürültüsünü azaltmak için merkez %80 yüz bölgesini al
+        int padX = Math.Max(0, (int)(gray.Width * 0.10));
+        int padY = Math.Max(0, (int)(gray.Height * 0.10));
+        int w = Math.Max(1, gray.Width - 2 * padX);
+        int h = Math.Max(1, gray.Height - 2 * padY);
+        using var cropped = new Mat(gray, new Rect(padX, padY, w, h));
+
         var resized = new Mat();
-        Cv2.Resize(gray, resized, new OpenCvSharp.Size(FeatureSize, FeatureSize));
+        Cv2.Resize(cropped, resized, new OpenCvSharp.Size(FeatureSize, FeatureSize));
         Cv2.EqualizeHist(resized, resized);
-        gray.Dispose();
         return resized;
     }
 
@@ -148,17 +184,25 @@ public class FaceRecognizerService
         using var normalized = PrepareGrayFace(input);
         int len = FeatureSize * FeatureSize;
         float[] vec = new float[len];
-        double normSq = 0;
 
+        double sum = 0;
         for (int y = 0; y < FeatureSize; y++)
         {
             for (int x = 0; x < FeatureSize; x++)
             {
                 float val = normalized.At<byte>(y, x) / 255.0f;
-                int idx = y * FeatureSize + x;
-                vec[idx] = val;
-                normSq += val * val;
+                vec[y * FeatureSize + x] = val;
+                sum += val;
             }
+        }
+
+        // Zero-Mean (ortalama çıkarma) -> rastgele/alakasız görüntülerde yüksek skor çıkmasını engeller
+        float mean = (float)(sum / len);
+        double normSq = 0;
+        for (int i = 0; i < len; i++)
+        {
+            vec[i] -= mean;
+            normSq += vec[i] * vec[i];
         }
 
         float norm = (float)Math.Sqrt(normSq);
@@ -170,13 +214,13 @@ public class FaceRecognizerService
         return vec;
     }
 
-    private static double CosineSimilarity(float[] a, float[] b)
+    private static double PearsonSimilarity(float[] a, float[] b)
     {
         double dot = 0;
         for (int i = 0; i < a.Length; i++)
         {
             dot += a[i] * b[i];
         }
-        return Math.Clamp(dot, 0.0, 1.0);
+        return dot;
     }
 }

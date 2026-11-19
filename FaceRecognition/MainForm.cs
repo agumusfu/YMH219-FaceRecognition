@@ -259,6 +259,7 @@ public partial class MainForm : Form
         }
 
         RefreshClassList();
+        ReprocessCurrentFrame();
         MessageBox.Show($"'{label}' etiketi için yeni yüz örneği kaydedildi ve modele eklendi.",
             "Örnek Eklendi", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
@@ -287,6 +288,56 @@ public partial class MainForm : Form
 
         MessageBox.Show($"{savedCount} adet yüz kırpılarak kaydedildi:\n{_recognizer.SavedFacesDirectory}",
             "Yüzler Kaydedildi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private void btnDeleteSelected_Click(object? sender, EventArgs e)
+    {
+        if (lstClasses.SelectedItem == null)
+        {
+            MessageBox.Show("Lütfen listeden silmek istediğiniz kişiyi seçin.", "Uyarı", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        string itemText = lstClasses.SelectedItem.ToString() ?? "";
+        int idx = itemText.LastIndexOf(" (");
+        string label = idx > 0 ? itemText[..idx] : itemText;
+
+        if (MessageBox.Show($"'{label}' kişisine ait tüm örnek fotoğraflar kalıcı olarak silinecek. Onaylıyor musunuz?",
+            "Silme Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+        {
+            _recognizer.DeleteClass(label);
+            RefreshClassList();
+            ReprocessCurrentFrame();
+        }
+    }
+
+    private void btnDeleteAll_Click(object? sender, EventArgs e)
+    {
+        if (MessageBox.Show("Kayıtlı tüm eğitim örnekleri ve kaydedilen yüz fotoğrafları kalıcı olarak silinecek. Onaylıyor musunuz?",
+            "Tümünü Sil Onayı", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+        {
+            _recognizer.DeleteAllTrainingData();
+            RefreshClassList();
+            ReprocessCurrentFrame();
+            MessageBox.Show("Tüm kayıtlı yüz örnekleri temizlendi.", "Bilgi", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+
+    private void ReprocessCurrentFrame()
+    {
+        Mat? clone = null;
+        lock (_frameLock)
+        {
+            if (_currentRawFrame != null && !_currentRawFrame.Empty())
+                clone = _currentRawFrame.Clone();
+        }
+        if (clone != null)
+        {
+            using (clone)
+            {
+                ProcessAndDisplayFrame(clone);
+            }
+        }
     }
 
     private void RefreshClassList()

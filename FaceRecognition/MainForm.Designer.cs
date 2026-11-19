@@ -46,7 +46,7 @@ partial class MainForm
 
         btnStartCam.Text = "Kamera Başlat";
         btnStartCam.Location = new Point(12, 10);
-        btnStartCam.Size = new Size(135, 36);
+        btnStartCam.Size = new Size(145, 38);
         btnStartCam.BackColor = Color.FromArgb(0, 150, 100);
         btnStartCam.ForeColor = Color.White;
         btnStartCam.FlatStyle = FlatStyle.Flat;
@@ -54,8 +54,8 @@ partial class MainForm
         pnlTop.Controls.Add(btnStartCam);
 
         btnStopCam.Text = "Kamera Durdur";
-        btnStopCam.Location = new Point(155, 10);
-        btnStopCam.Size = new Size(135, 36);
+        btnStopCam.Location = new Point(165, 10);
+        btnStopCam.Size = new Size(150, 38);
         btnStopCam.BackColor = Color.FromArgb(180, 50, 50);
         btnStopCam.ForeColor = Color.White;
         btnStopCam.FlatStyle = FlatStyle.Flat;
@@ -64,8 +64,8 @@ partial class MainForm
         pnlTop.Controls.Add(btnStopCam);
 
         btnLoadImage.Text = "Görüntü Seç";
-        btnLoadImage.Location = new Point(298, 10);
-        btnLoadImage.Size = new Size(125, 36);
+        btnLoadImage.Location = new Point(323, 10);
+        btnLoadImage.Size = new Size(135, 38);
         btnLoadImage.BackColor = Color.FromArgb(50, 110, 200);
         btnLoadImage.ForeColor = Color.White;
         btnLoadImage.FlatStyle = FlatStyle.Flat;
@@ -73,8 +73,8 @@ partial class MainForm
         pnlTop.Controls.Add(btnLoadImage);
 
         btnSaveFaces.Text = "Yüzleri Kaydet";
-        btnSaveFaces.Location = new Point(431, 10);
-        btnSaveFaces.Size = new Size(130, 36);
+        btnSaveFaces.Location = new Point(466, 10);
+        btnSaveFaces.Size = new Size(160, 38);
         btnSaveFaces.BackColor = Color.FromArgb(0, 140, 130);
         btnSaveFaces.ForeColor = Color.White;
         btnSaveFaces.FlatStyle = FlatStyle.Flat;
@@ -84,7 +84,7 @@ partial class MainForm
         lblStatus.Text = "Durum: Hazır";
         lblStatus.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
         lblStatus.ForeColor = Color.LightSkyBlue;
-        lblStatus.Location = new Point(600, 17);
+        lblStatus.Location = new Point(645, 17);
         lblStatus.AutoSize = true;
         pnlTop.Controls.Add(lblStatus);
 
@@ -108,10 +108,10 @@ partial class MainForm
         pnlRight.Dock = DockStyle.Fill;
         pnlRight.BackColor = Color.FromArgb(28, 30, 42);
 
-        grpTrain.Text = "Yerel Eğitim / Örnek Ekleme";
+        grpTrain.Text = "Yerel Eğitim / Örnek Yönetimi";
         grpTrain.ForeColor = Color.LightGray;
         grpTrain.Dock = DockStyle.Top;
-        grpTrain.Height = 250;
+        grpTrain.Height = 295;
         grpTrain.Padding = new Padding(8);
 
         lblLabel.Text = "Kişi Etiketi:";
@@ -120,7 +120,7 @@ partial class MainForm
         lblLabel.AutoSize = true;
         grpTrain.Controls.Add(lblLabel);
 
-        txtLabel.Location = new Point(92, 22);
+        txtLabel.Location = new Point(98, 22);
         txtLabel.Width = 200;
         txtLabel.BackColor = Color.FromArgb(50, 54, 70);
         txtLabel.ForeColor = Color.White;
@@ -128,20 +128,40 @@ partial class MainForm
 
         btnAddSample.Text = "Algılanan Yüzü Örnek Ekle";
         btnAddSample.Location = new Point(10, 56);
-        btnAddSample.Size = new Size(282, 34);
+        btnAddSample.Size = new Size(288, 36);
         btnAddSample.BackColor = Color.FromArgb(200, 140, 30);
         btnAddSample.ForeColor = Color.White;
         btnAddSample.FlatStyle = FlatStyle.Flat;
         btnAddSample.Click += btnAddSample_Click;
         grpTrain.Controls.Add(btnAddSample);
 
-        lstClasses.Location = new Point(10, 98);
-        lstClasses.Size = new Size(282, 138);
+        lstClasses.Location = new Point(10, 100);
+        lstClasses.Size = new Size(288, 138);
         lstClasses.BackColor = Color.FromArgb(22, 24, 34);
         lstClasses.ForeColor = Color.LightCyan;
         lstClasses.BorderStyle = BorderStyle.None;
         lstClasses.Font = new Font("Consolas", 9.5f);
         grpTrain.Controls.Add(lstClasses);
+
+        this.btnDeleteSelected = new Button();
+        btnDeleteSelected.Text = "Seçili Kişiyi Sil";
+        btnDeleteSelected.Location = new Point(10, 246);
+        btnDeleteSelected.Size = new Size(145, 36);
+        btnDeleteSelected.BackColor = Color.FromArgb(180, 55, 55);
+        btnDeleteSelected.ForeColor = Color.White;
+        btnDeleteSelected.FlatStyle = FlatStyle.Flat;
+        btnDeleteSelected.Click += btnDeleteSelected_Click;
+        grpTrain.Controls.Add(btnDeleteSelected);
+
+        this.btnDeleteAll = new Button();
+        btnDeleteAll.Text = "Tümünü Sil";
+        btnDeleteAll.Location = new Point(163, 246);
+        btnDeleteAll.Size = new Size(135, 36);
+        btnDeleteAll.BackColor = Color.FromArgb(95, 50, 60);
+        btnDeleteAll.ForeColor = Color.White;
+        btnDeleteAll.FlatStyle = FlatStyle.Flat;
+        btnDeleteAll.Click += btnDeleteAll_Click;
+        grpTrain.Controls.Add(btnDeleteAll);
 
         grpResults.Text = "Algılanan Yüzler & Güven Skoru";
         grpResults.ForeColor = Color.LightGray;
@@ -175,8 +195,8 @@ partial class MainForm
 
         // MainForm
         this.Text = "YMH 219 - OpenCV Yüz Algılama ve Tanıma";
-        this.Size = new Size(1120, 680);
-        this.MinimumSize = new Size(960, 580);
+        this.Size = new Size(1160, 700);
+        this.MinimumSize = new Size(1000, 600);
         this.BackColor = Color.FromArgb(24, 26, 36);
         this.Controls.Add(splitMain);
         this.Controls.Add(pnlTop);
@@ -187,7 +207,7 @@ partial class MainForm
     }
 
     private Panel pnlTop, pnlRight;
-    private Button btnStartCam, btnStopCam, btnLoadImage, btnSaveFaces, btnAddSample;
+    private Button btnStartCam, btnStopCam, btnLoadImage, btnSaveFaces, btnAddSample, btnDeleteSelected, btnDeleteAll;
     private Label lblStatus, lblLabel;
     private TextBox txtLabel;
     private SplitContainer splitMain;

@@ -28,7 +28,9 @@ Bu proje, **OpenCvSharp4** kütüphanesi kullanılarak kameradan veya seçilen g
   - `OpenCvSharp4` (`4.10.0.20241108`)
   - `OpenCvSharp4.runtime.win` (`4.10.0.20241108`)
   - `OpenCvSharp4.Extensions` (`4.10.0.20241108`)
-- **Algılama Modeli:** OpenCV Haar Cascade (`haarcascade_frontalface_default.xml`)
+- **Algılama Modelleri:**
+  - `haarcascade_frontalface_default.xml` (Ön yüz tespiti)
+  - `haarcascade_eye_tree_eyeglasses.xml` (Yüz dışı yanlış algılamaları elemek için göz doğrulaması)
 
 ---
 
@@ -61,9 +63,9 @@ YMH219-FaceRecognition/
 ## Temel Özellikler
 
 - **Kamera ve Görüntü Desteği:** `Kamera Başlat` / `Kamera Durdur` ile canlı kamera akışı ve `Görüntü Seç` ile dosya üzerinden analiz.
-- **Çoklu Yüz Algılama:** Aynı karedeki birden fazla yüzü eş zamanlı olarak dikdörtgen çerçeve ile işaretler.
-- **Yerel Örnek Eğitimi & Tanıma:** Uygulama içindeki **Yerel Eğitim / Örnek Ekleme** panelinden kişi etiketi girip algılanan yüzü `%LocalAppData%\FaceRecognition\TrainingData\` altına kaydederek anlık tanıma modeli oluşturabilirsiniz.
-- **Güven Skoru Gösterimi:** Tanınan her yüz için hem görüntü çerçevesi üzerinde hem de sağdaki sonuç listesinde yüzde güven skoru gösterilir.
+- **Doğrulanmış Çoklu Yüz Algılama:** Aynı karedeki birden fazla yüzü kontrast kontrolü ve göz bölgesi doğrulamasıyla tespit ederek yüz dışı alanları eler.
+- **Yerel Örnek Eğitimi & Silme Yönetimi:** Uygulama içindeki **Yerel Eğitim / Örnek Yönetimi** panelinden kişi etiketi girip örnek ekleyebilir; `Seçili Kişiyi Sil` veya `Tümünü Sil` butonlarıyla kayıtlı örnek fotoğrafları tek tıkla silebilirsiniz.
+- **Sıfır-Ortalamalı Tanıma & Güven Skoru:** Zero-Mean Pearson korelasyonuyla benzerlik hesaplanır; tanınan her yüz için yüzde güven skoru gösterilir, eşiğin altındakiler `Bilinmeyen` olarak işaretlenir.
 - **Yüzleri Kaydetme:** `Yüzleri Kaydet` butonu ile karede algılanan tüm yüzler kırpılarak `%LocalAppData%\FaceRecognition\SavedFaces\` klasörüne kaydedilir.
 - **Hata Yönetimi:** Kamera aygıtı bulunamadığında veya model dosyası yüklenemediğinde uygulama çökmeden kullanıcıya anlaşılır hata mesajı gösterir.
 
